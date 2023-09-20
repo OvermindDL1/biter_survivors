@@ -1,5 +1,7 @@
 #![warn(clippy::pedantic)]
-#[allow(clippy::needless_pass_by_value)] // Bevy uses this pattern a lot for systems
+#![allow(clippy::needless_pass_by_value)] // Bevy uses this pattern a lot for systems
+#![allow(clippy::module_name_repetitions)] // Bevy uses this pattern a lot for Plugins
+
 pub mod states;
 
 use bevy::prelude::*;
