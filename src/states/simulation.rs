@@ -90,12 +90,12 @@ fn spawn_sim(
 				color: Color::GREEN,
 			},
 			SpriteBundle {
-				sprite: Default::default(),
-				transform: Default::default(),
-				global_transform: Default::default(),
-				texture: Default::default(),
-				visibility: Default::default(),
-				computed_visibility: Default::default(),
+				sprite: Sprite::default(),
+				transform: Transform::default(),
+				global_transform: GlobalTransform::default(),
+				texture: Handle::default(),
+				visibility: Visibility::default(),
+				computed_visibility: ComputedVisibility::default(),
 			},
 		))
 		.id();
@@ -118,7 +118,7 @@ fn handle_sim_input(
 	mut exit: EventWriter<AppExit>,
 	keyboard_input: Res<Input<KeyCode>>,
 	players: Res<Players>,
-	mut player_query: Query<(&Player, &mut Transform)>,
+	mut player_query: Query<&mut Transform, With<Player>>,
 ) {
 	if keyboard_input.just_pressed(KeyCode::Escape) {
 		exit.send(AppExit);
@@ -140,7 +140,7 @@ fn handle_sim_input(
 		let player_translation_delta =
 			player_translation_delta.normalize_or_zero() * (time.period.as_secs_f32() * BASE_MOVE_SPEED);
 		if let Some(player_id) = players.players.get(0).copied().flatten() {
-			if let Ok((_, mut player_transform)) = player_query.get_mut(player_id) {
+			if let Ok(mut player_transform) = player_query.get_mut(player_id) {
 				let player_translation = &mut player_transform.translation;
 				*player_translation += player_translation_delta;
 				player_translation.z = 0.0;
@@ -152,19 +152,19 @@ fn handle_sim_input(
 #[tracing::instrument(skip())]
 fn update_sim(
 	time: Res<FixedTime>,
-	mut camera: Query<(&SimTag, &Camera, &mut Transform)>,
-	players: Query<(&Player, &GlobalTransform)>,
+	mut camera: Query<&mut Transform, (With<SimTag>, With<Camera>)>,
+	players: Query<&GlobalTransform, With<Player>>,
 ) {
 	let camera_destination = {
 		let (summed, count) = players
 			.iter()
-			.map(|(_, player_transform)| player_transform.translation())
+			.map(GlobalTransform::translation)
 			.fold((Vec3::ZERO, 0f32), |(sum, count), position| {
 				(sum + position, count + 1.0)
 			});
 		summed / count
 	};
-	let camera_translation = &mut camera.single_mut().2.translation;
+	let camera_translation = &mut camera.single_mut().translation;
 	*camera_translation = camera_translation.lerp(
 		camera_destination,
 		time.period.as_secs_f32().min(1.0) * CAMERA_SNAP_MULT,
@@ -175,10 +175,10 @@ fn update_sim(
 fn display_ui(
 	time: Res<Time>,
 	fixed_time: Res<FixedTime>,
-	mut top_text_query: Query<(&mut Text, &mut TopText)>,
+	mut top_text_query: Query<&mut Text, With<TopText>>,
 	player_query: Query<(&Player, &GlobalTransform)>,
 ) {
-	let Ok((mut text, _)) = top_text_query.get_single_mut() else {
+	let Ok(mut text) = top_text_query.get_single_mut() else {
 		error!("Failed to get top text");
 		return;
 	};
