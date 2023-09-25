@@ -5,12 +5,16 @@
 pub mod states;
 
 use bevy::prelude::*;
+use bevy_fast_tilemap::FastTileMapPlugin;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 fn main() {
 	App::new()
 		.add_plugins(DefaultPlugins)
+		.add_plugins(FastTileMapPlugin::default())
 		.add_plugins(states::StatePlugin)
 		.add_systems(Startup, switch_to_sim_now)
+		.add_plugins(WorldInspectorPlugin::new())
 		.run();
 }
 
