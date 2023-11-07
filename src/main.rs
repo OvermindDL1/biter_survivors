@@ -13,8 +13,8 @@ fn main() {
 		.add_plugins(DefaultPlugins)
 		.add_plugins(FastTileMapPlugin::default())
 		.add_plugins(states::StatePlugin)
-		.add_systems(Startup, switch_to_sim_now)
 		.add_plugins(WorldInspectorPlugin::new())
+		.add_systems(Startup, switch_to_sim_now)
 		.run();
 }
 

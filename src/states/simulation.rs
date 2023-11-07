@@ -13,7 +13,11 @@ pub struct SimulationPlugin;
 
 impl Plugin for SimulationPlugin {
 	fn build(&self, app: &mut App) {
-		app.add_systems(OnEnter(AppState::Simulation), spawn_sim)
+		app.register_type::<SimTag>()
+			.register_type::<TopText>()
+			.register_type::<Player>()
+			.register_type::<Players>()
+			.add_systems(OnEnter(AppState::Simulation), spawn_sim)
 			.add_systems(OnExit(AppState::Simulation), despawn_sim)
 			.add_systems(FixedUpdate, handle_sim_input.run_if(in_state(AppState::Simulation)))
 			.add_systems(FixedUpdate, update_sim.run_if(in_state(AppState::Simulation)))
@@ -22,19 +26,19 @@ impl Plugin for SimulationPlugin {
 	}
 }
 
-#[derive(Component)]
+#[derive(Component, Reflect)]
 pub struct SimTag;
 
-#[derive(Component)]
+#[derive(Component, Reflect)]
 pub struct TopText;
 
-#[derive(Component)]
+#[derive(Component, Reflect)]
 pub struct Player {
 	pub name: String,
 	pub color: Color,
 }
 
-#[derive(Resource, Debug)]
+#[derive(Resource, Debug, Reflect)]
 pub struct Players {
 	pub players: Vec<Option<Entity>>,
 }
